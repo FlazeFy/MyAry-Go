@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	router "myary/routes"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,13 +35,13 @@ func init() {
 
 func main() {
 	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello World",
-		})
-	})
+	db := mongoClient.Database("myary")
 
-	r.Run()
+	router.SetupRoutes(r, db)
+
+	if err := r.Run(); err != nil {
+		log.Fatal("Server failed to start:", err)
+	}
 }
 
 func connect_to_mongodb() error {
