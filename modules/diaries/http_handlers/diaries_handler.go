@@ -11,11 +11,11 @@ import (
 
 // Interface & Struct
 type DiaryHandler struct {
-	service repositories.DiaryService
+	repo repositories.DiaryService
 }
 
-func NewDiaryHandler(service repositories.DiaryService) *DiaryHandler {
-	return &DiaryHandler{service: service}
+func NewDiaryHandler(repo repositories.DiaryService) *DiaryHandler {
+	return &DiaryHandler{repo: repo}
 }
 
 // Command Handler
@@ -26,8 +26,8 @@ func (h *DiaryHandler) CreateDiary(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.CreateDiary(diary); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create diary"})
+	if err := h.repo.CreateDiary(diary); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
 		return
 	}
 
@@ -36,11 +36,15 @@ func (h *DiaryHandler) CreateDiary(c *gin.Context) {
 
 // Query Handler
 func (h *DiaryHandler) GetDiaries(c *gin.Context) {
-	diaries, err := h.service.FetchDiaries()
+	diaries, err := h.repo.FetchDiaries()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch diary"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
 		return
 	}
 
-	c.JSON(http.StatusOK, diaries)
+	if len(diaries) > 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "Diary found", "data": diaries})
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Diary not found", "data": nil})
+	}
 }
