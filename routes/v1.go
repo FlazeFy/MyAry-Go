@@ -9,6 +9,10 @@ import (
 	historyRepositories "myary/modules/histories/repositories"
 	historyServices "myary/modules/histories/services"
 
+	dictionaryHandlers "myary/modules/dictionaries/http_handlers"
+	dictionaryRepositories "myary/modules/dictionaries/repositories"
+	dictionaryServices "myary/modules/dictionaries/services"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,7 +22,6 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	diaryService := diaryServices.NewDiaryService(db)
 	diaryRepo := diaryRepositories.NewDiaryService(diaryService)
 	diaryHandler := diaryHandlers.NewDiaryHandler(diaryRepo)
-
 	diaryGroup := r.Group("/api/v1/diary")
 	{
 		diaryGroup.POST("", diaryHandler.CreateDiary)
@@ -29,10 +32,19 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	historyService := historyServices.NewHistoryService(db)
 	historyRepo := historyRepositories.NewHistoryService(historyService)
 	historyHandler := historyHandlers.NewHistoryHandler(historyRepo)
-
 	historyGroup := r.Group("/api/v1/history")
 	{
 		historyGroup.POST("", historyHandler.CreateHistory)
 		historyGroup.GET("", historyHandler.GetHistories)
+	}
+
+	// Dictionary Module
+	dictionaryService := dictionaryServices.NewDictionaryService(db)
+	dictionaryRepo := dictionaryRepositories.NewDictionaryService(dictionaryService)
+	dictionaryHandler := dictionaryHandlers.NewDictionaryHandler(dictionaryRepo)
+	dictionaryGroup := r.Group("/api/v1/dictionary")
+	{
+		dictionaryGroup.POST("", dictionaryHandler.CreateDictionary)
+		dictionaryGroup.GET("", dictionaryHandler.GetDictionaries)
 	}
 }

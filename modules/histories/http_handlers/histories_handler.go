@@ -25,7 +25,7 @@ func (h *HistoryHandler) CreateHistory(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateHistory(history); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create history"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
 		return
 	}
 
