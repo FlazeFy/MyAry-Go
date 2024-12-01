@@ -11,20 +11,32 @@ type DictionaryService interface {
 	FetchDictionaries() ([]models.DictionaryModel, error)
 }
 type dictionaryService struct {
-	repo services.DictionaryService
+	service          services.DictionaryService
+	firestoreService services.DictionaryService
 }
 
-func NewDictionaryService(repo services.DictionaryService) DictionaryService {
-	return &dictionaryService{repo: repo}
+func NewDictionaryService(service services.DictionaryService) DictionaryService {
+	return &dictionaryService{service: service}
 }
 
 // Command Repo
 func (s *dictionaryService) CreateDictionary(dictionary models.DictionaryModel) error {
-	_, err := s.repo.Insert(dictionary)
-	return err
+	// MongoDB
+	_, _, err := s.service.Insert(dictionary)
+	if err != nil {
+		return err
+	}
+
+	// Firestore
+	_, _, err = s.firestoreService.Insert(dictionary)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Query Repo
 func (s *dictionaryService) FetchDictionaries() ([]models.DictionaryModel, error) {
-	return s.repo.GetAll()
+	return s.service.GetAll()
 }
