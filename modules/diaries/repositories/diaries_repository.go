@@ -47,7 +47,6 @@ func (s *diaryService) UpdateDiary(diary models.DiaryModel, updates map[string]i
 
 	return s.repo.Update(filter, update)
 }
-
 func (s *diaryService) DeleteDiary(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	filter := bson.M{"_id": id}
 	return s.repo.Delete(filter)

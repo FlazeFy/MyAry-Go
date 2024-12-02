@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Interface & Struct
@@ -30,6 +31,27 @@ func (h *HistoryHandler) CreateHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "History created"})
+}
+func (h *HistoryHandler) DeleteHistory(c *gin.Context) {
+	id := c.Param("id")
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	result, err := h.repo.DeleteHistory(objectID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "History not found"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "History deleted successfully"})
+	}
 }
 
 // Query Handler

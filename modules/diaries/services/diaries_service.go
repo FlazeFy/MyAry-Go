@@ -53,7 +53,6 @@ func (s *diaryService) Update(filter bson.M, update bson.M) (*mongo.UpdateResult
 
 	return s.collection.UpdateOne(context.TODO(), filter, update)
 }
-
 func (s *diaryService) Delete(filter bson.M) (*mongo.DeleteResult, error) {
 	return s.collection.DeleteOne(context.TODO(), filter)
 }

@@ -38,6 +38,7 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	{
 		historyGroup.POST("", historyHandler.CreateHistory)
 		historyGroup.GET("", historyHandler.GetHistories)
+		historyGroup.DELETE("/:id", historyHandler.DeleteHistory)
 	}
 
 	// Dictionary Module
@@ -48,5 +49,6 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	{
 		dictionaryGroup.POST("", dictionaryHandler.CreateDictionary)
 		dictionaryGroup.GET("", dictionaryHandler.GetDictionaries)
+		dictionaryGroup.DELETE("/:id", dictionaryHandler.DeleteDictionary)
 	}
 }

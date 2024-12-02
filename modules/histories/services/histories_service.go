@@ -13,6 +13,7 @@ import (
 type HistoryService interface {
 	Insert(history models.HistoryModel) (*mongo.InsertOneResult, error)
 	GetAll() ([]models.HistoryModel, error)
+	Delete(filter bson.M) (*mongo.DeleteResult, error)
 }
 type historyService struct {
 	collection *mongo.Collection
@@ -27,6 +28,9 @@ func NewHistoryService(db *mongo.Database) HistoryService {
 // Command Service
 func (r *historyService) Insert(history models.HistoryModel) (*mongo.InsertOneResult, error) {
 	return r.collection.InsertOne(context.TODO(), history)
+}
+func (s *historyService) Delete(filter bson.M) (*mongo.DeleteResult, error) {
+	return s.collection.DeleteOne(context.TODO(), filter)
 }
 
 // Query Service

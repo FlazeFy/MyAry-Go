@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"myary/modules/dictionaries/models"
 
 	"cloud.google.com/go/firestore"
@@ -14,6 +15,7 @@ import (
 type DictionaryService interface {
 	Insert(dictionary models.DictionaryModel) (interface{}, string, error)
 	GetAll() ([]models.DictionaryModel, error)
+	Delete(filter bson.M) (*mongo.DeleteResult, error)
 }
 type dictionaryService struct {
 	collection *mongo.Collection
@@ -47,6 +49,28 @@ func (s *firestoreDictionaryService) Insert(dictionary models.DictionaryModel) (
 		return nil, "", err
 	}
 	return writeResult, docRef.ID, nil
+}
+func (s *dictionaryService) Delete(filter bson.M) (*mongo.DeleteResult, error) {
+	return s.collection.DeleteOne(context.TODO(), filter)
+}
+func (s *firestoreDictionaryService) Delete(filter bson.M) (*mongo.DeleteResult, error) {
+	documentID, ok := filter["_id"].(string)
+	if !ok {
+		return nil, errors.New("invalid filter: _id must be a string")
+	}
+
+	docRef := s.collection.Doc(documentID)
+
+	_, err := docRef.Delete(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	deleteResult := &mongo.DeleteResult{
+		DeletedCount: 1,
+	}
+
+	return deleteResult, nil
 }
 
 // Query Service
