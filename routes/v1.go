@@ -26,6 +26,8 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	{
 		diaryGroup.POST("", diaryHandler.CreateDiary)
 		diaryGroup.GET("", diaryHandler.GetDiaries)
+		diaryGroup.PUT("/:id", diaryHandler.UpdateDiary)
+		diaryGroup.DELETE("/:id", diaryHandler.DeleteDiary)
 	}
 
 	// History Module
