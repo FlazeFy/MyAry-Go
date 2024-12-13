@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"myary/modules/diaries/models"
 	"myary/modules/diaries/services"
 
@@ -15,6 +16,8 @@ type DiaryService interface {
 	FetchDiaries() ([]models.DiaryModel, error)
 	UpdateDiary(diary models.DiaryModel, updates map[string]interface{}) (*mongo.UpdateResult, error)
 	DeleteDiary(id primitive.ObjectID) (*mongo.DeleteResult, error)
+	FetchDiaryStatsLifetime() (models.StatsDiaryLifetimeModel, error)
+	FetchDiaryById(id string) (*models.DiaryModel, error)
 }
 type diaryService struct {
 	repo services.DiaryService
@@ -54,5 +57,20 @@ func (s *diaryService) DeleteDiary(id primitive.ObjectID) (*mongo.DeleteResult, 
 
 // Query Repo
 func (s *diaryService) FetchDiaries() ([]models.DiaryModel, error) {
-	return s.repo.GetAll()
+	diary, err := s.repo.GetAll()
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	return diary, nil
+}
+func (s *diaryService) FetchDiaryStatsLifetime() (models.StatsDiaryLifetimeModel, error) {
+	return s.repo.GetStatsDiaryLifetime()
+}
+func (s *diaryService) FetchDiaryById(id string) (*models.DiaryModel, error) {
+	diary, err := s.repo.GetOneById(id)
+	if err != nil {
+		return nil, err
+	}
+	return &diary, nil
 }

@@ -2,11 +2,13 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"myary/modules/diaries/models"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -17,6 +19,8 @@ type DiaryService interface {
 	GetAll() ([]models.DiaryModel, error)
 	Update(filter bson.M, update bson.M) (*mongo.UpdateResult, error)
 	Delete(filter bson.M) (*mongo.DeleteResult, error)
+	GetStatsDiaryLifetime() (models.StatsDiaryLifetimeModel, error)
+	GetOneById(id string) (models.DiaryModel, error)
 }
 type diaryService struct {
 	collection *mongo.Collection
@@ -70,4 +74,56 @@ func (r *diaryService) GetAll() ([]models.DiaryModel, error) {
 	}
 
 	return diaries, nil
+}
+func (r *diaryService) GetOneById(id string) (models.DiaryModel, error) {
+	var diary models.DiaryModel
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return diary, fmt.Errorf("invalid ID format: %v", err)
+	}
+
+	filter := bson.M{"_id": objectID}
+	err = r.collection.FindOne(context.TODO(), filter).Decode(&diary)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return diary, fmt.Errorf("diary not found")
+		}
+		return diary, err
+	}
+
+	return diary, nil
+}
+func (r *diaryService) GetStatsDiaryLifetime() (models.StatsDiaryLifetimeModel, error) {
+	pipeline := mongo.Pipeline{
+		{
+			{
+				Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "total", Value: bson.D{{Key: "$sum", Value: 1}}},
+					{Key: "average_mood", Value: bson.D{{Key: "$avg", Value: "$diary_mood"}}},
+					{Key: "average_tired", Value: bson.D{{Key: "$avg", Value: "$diary_tired"}}},
+				}},
+		},
+	}
+
+	cursor, err := r.collection.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return models.StatsDiaryLifetimeModel{}, err
+	}
+
+	var results []models.StatsDiaryLifetimeModel
+	if err := cursor.All(context.TODO(), &results); err != nil {
+		return models.StatsDiaryLifetimeModel{}, err
+	}
+
+	if len(results) == 0 {
+		return models.StatsDiaryLifetimeModel{
+			Total:        0,
+			AverageMood:  0,
+			AverageTired: 0,
+		}, nil
+	}
+
+	return results[0], nil
 }

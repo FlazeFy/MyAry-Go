@@ -97,3 +97,33 @@ func (h *DiaryHandler) GetDiaries(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Diary not found", "data": nil})
 	}
 }
+func (h *DiaryHandler) GetDiaryStatsLifetime(c *gin.Context) {
+	diary, err := h.repo.FetchDiaryStatsLifetime()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
+		return
+	}
+
+	if diary.Total == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Diary not found", "data": nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Diary found", "data": diary})
+}
+func (h *DiaryHandler) GetDiaryById(c *gin.Context) {
+	id := c.Param("id")
+
+	diary, err := h.repo.FetchDiaryById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
+		return
+	}
+
+	if diary == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Diary not found", "data": nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Diary found", "data": diary})
+}

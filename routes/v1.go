@@ -30,6 +30,8 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	{
 		diaryGroup.POST("", diaryHandler.CreateDiary)
 		diaryGroup.GET("", diaryHandler.GetDiaries)
+		diaryGroup.GET("/:id", diaryHandler.GetDiaryById)
+		diaryGroup.GET("/stats/lifetime", diaryHandler.GetDiaryStatsLifetime)
 		diaryGroup.PUT("/:id", diaryHandler.UpdateDiary)
 		diaryGroup.DELETE("/:id", diaryHandler.DeleteDiary)
 	}

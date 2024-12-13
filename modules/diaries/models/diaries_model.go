@@ -16,3 +16,9 @@ type DiaryModel struct {
 	CreatedAt  time.Time          `bson:"created_at"`
 	UpdatedAt  *time.Time         `bson:"updated_at"`
 }
+
+type StatsDiaryLifetimeModel struct {
+	Total        int     `bson:"total" json:"total"`
+	AverageMood  float32 `bson:"average_mood" json:"average_mood"`
+	AverageTired float32 `bson:"average_tired" json:"average_tired"`
+}
