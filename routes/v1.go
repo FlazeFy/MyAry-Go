@@ -13,6 +13,10 @@ import (
 	dictionaryRepositories "myary/modules/dictionaries/repositories"
 	dictionaryServices "myary/modules/dictionaries/services"
 
+	feedbackHandlers "myary/modules/feedbacks/http_handlers"
+	feedbackRepositories "myary/modules/feedbacks/repositories"
+	feedbackServices "myary/modules/feedbacks/services"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -50,5 +54,16 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 		dictionaryGroup.POST("", dictionaryHandler.CreateDictionary)
 		dictionaryGroup.GET("", dictionaryHandler.GetDictionaries)
 		dictionaryGroup.DELETE("/:id", dictionaryHandler.DeleteDictionary)
+	}
+
+	// Feedback Module
+	feedbackService := feedbackServices.NewFeedbackService(db)
+	feedbackRepo := feedbackRepositories.NewFeedbackService(feedbackService)
+	feedbackHandler := feedbackHandlers.NewFeedbackHandler(feedbackRepo)
+	feedbackGroup := r.Group("/api/v1/feedback")
+	{
+		feedbackGroup.POST("", feedbackHandler.CreateFeedback)
+		feedbackGroup.GET("", feedbackHandler.GetFeedBack)
+		feedbackGroup.DELETE("/:id", feedbackHandler.DeleteFeedback)
 	}
 }

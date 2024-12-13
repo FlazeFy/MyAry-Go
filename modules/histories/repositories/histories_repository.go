@@ -10,30 +10,30 @@ import (
 )
 
 // Interface & Struct
-type HistoryService interface {
+type HistoryRepository interface {
 	CreateHistory(history models.HistoryModel) error
 	FetchHistories() ([]models.HistoryModel, error)
 	DeleteHistory(id primitive.ObjectID) (*mongo.DeleteResult, error)
 }
 type historyService struct {
-	repo services.HistoryService
+	service services.HistoryService
 }
 
-func NewHistoryService(repo services.HistoryService) HistoryService {
-	return &historyService{repo: repo}
+func NewHistoryService(service services.HistoryService) HistoryRepository {
+	return &historyService{service: service}
 }
 
 // Command Repo
 func (s *historyService) CreateHistory(history models.HistoryModel) error {
-	_, err := s.repo.Insert(history)
+	_, err := s.service.Insert(history)
 	return err
 }
 func (s *historyService) DeleteHistory(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	filter := bson.M{"_id": id}
-	return s.repo.Delete(filter)
+	return s.service.Delete(filter)
 }
 
 // Query Repo
 func (s *historyService) FetchHistories() ([]models.HistoryModel, error) {
-	return s.repo.GetAll()
+	return s.service.GetAll()
 }

@@ -11,10 +11,10 @@ import (
 
 // Interface & Struct
 type HistoryHandler struct {
-	repo repositories.HistoryService
+	repo repositories.HistoryRepository
 }
 
-func NewHistoryHandler(repo repositories.HistoryService) *HistoryHandler {
+func NewHistoryHandler(repo repositories.HistoryRepository) *HistoryHandler {
 	return &HistoryHandler{repo: repo}
 }
 
