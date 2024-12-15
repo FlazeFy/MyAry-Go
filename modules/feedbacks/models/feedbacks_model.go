@@ -12,3 +12,7 @@ type FeedbackModel struct {
 	FeedbackRate int                `bson:"feedback_rate" json:"feedback_rate"`
 	CreatedAt    time.Time          `bson:"created_at"`
 }
+type StatsFeedback struct {
+	Context string `bson:"context" json:"context"`
+	Total   int    `bson:"total" json:"total"`
+}

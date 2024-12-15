@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"myary/modules/dictionaries/models"
 
 	"cloud.google.com/go/firestore"
@@ -16,6 +17,7 @@ type DictionaryService interface {
 	Insert(dictionary models.DictionaryModel) (interface{}, string, error)
 	GetAll() ([]models.DictionaryModel, error)
 	Delete(filter bson.M) (*mongo.DeleteResult, error)
+	GetTotalDictionaryUsed() ([]models.StatsDictionary, error)
 }
 type dictionaryService struct {
 	collection *mongo.Collection
@@ -73,7 +75,7 @@ func (s *firestoreDictionaryService) Delete(filter bson.M) (*mongo.DeleteResult,
 	return deleteResult, nil
 }
 
-// Query Service
+// Query Service - MongoDB
 func (r *dictionaryService) GetAll() ([]models.DictionaryModel, error) {
 	cursor, err := r.collection.Find(context.TODO(), bson.M{}, options.Find())
 	if err != nil {
@@ -87,7 +89,39 @@ func (r *dictionaryService) GetAll() ([]models.DictionaryModel, error) {
 
 	return dictionaries, nil
 }
+func (r *dictionaryService) GetTotalDictionaryUsed() ([]models.StatsDictionary, error) {
+	pipeline := mongo.Pipeline{
+		{
+			{
+				Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$dictionary_type"},
+					{Key: "total", Value: bson.D{{Key: "$sum", Value: 1}}},
+				}},
+		},
+		{
+			{
+				Key: "$project", Value: bson.D{
+					{Key: "context", Value: "$_id"},
+					{Key: "total", Value: 1},
+					{Key: "_id", Value: 0},
+				}},
+		},
+	}
 
+	cursor, err := r.collection.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []models.StatsDictionary
+	if err := cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+// Query Service - Firestore
 func (s *firestoreDictionaryService) GetAll() ([]models.DictionaryModel, error) {
 	iter := s.collection.Documents(context.TODO())
 	var dictionaries []models.DictionaryModel
@@ -108,4 +142,36 @@ func (s *firestoreDictionaryService) GetAll() ([]models.DictionaryModel, error) 
 	}
 
 	return dictionaries, nil
+}
+func (r *firestoreDictionaryService) GetTotalDictionaryUsed() ([]models.StatsDictionary, error) {
+	iter := r.collection.Documents(context.TODO())
+	typeCount := make(map[string]int)
+
+	for {
+		doc, err := iter.Next()
+		if err != nil {
+			if err.Error() == "iterator: no more documents" {
+				break
+			}
+			return nil, err
+		}
+
+		data := doc.Data()
+		dictionaryType, ok := data["dictionary_type"].(string)
+		if !ok {
+			return nil, fmt.Errorf("failed to cast dictionary_type to string")
+		}
+
+		typeCount[dictionaryType]++
+	}
+
+	var results []models.StatsDictionary
+	for dictType, count := range typeCount {
+		results = append(results, models.StatsDictionary{
+			Context: dictType,
+			Total:   count,
+		})
+	}
+
+	return results, nil
 }

@@ -7,3 +7,7 @@ type DictionaryModel struct {
 	DictionaryType string             `bson:"dictionary_type" json:"dictionary_type"`
 	DictionaryName string             `bson:"dictionary_name" json:"dictionary_name"`
 }
+type StatsDictionary struct {
+	Context string `bson:"context" json:"context"`
+	Total   int    `bson:"total" json:"total"`
+}

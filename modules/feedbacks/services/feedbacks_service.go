@@ -14,6 +14,7 @@ type FeedbackService interface {
 	Insert(feedback models.FeedbackModel) (*mongo.InsertOneResult, error)
 	GetAll() ([]models.FeedbackModel, error)
 	Delete(filter bson.M) (*mongo.DeleteResult, error)
+	GetFeedBackStats() ([]models.StatsFeedback, error)
 }
 
 type feedbackService struct {
@@ -47,4 +48,34 @@ func (r *feedbackService) GetAll() ([]models.FeedbackModel, error) {
 	}
 
 	return feedbacks, nil
+}
+
+func (r *feedbackService) GetFeedBackStats() ([]models.StatsFeedback, error) {
+	pipeline := mongo.Pipeline{
+		{
+			{Key: "$group", Value: bson.D{
+				{Key: "_id", Value: "$feedback_rate"},
+				{Key: "total", Value: bson.D{{Key: "$sum", Value: 1}}},
+			}},
+		},
+		{
+			{Key: "$project", Value: bson.D{
+				{Key: "context", Value: "$_id"},
+				{Key: "total", Value: 1},
+				{Key: "_id", Value: 0},
+			}},
+		},
+	}
+
+	cursor, err := r.collection.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []models.StatsFeedback
+	if err := cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }

@@ -14,6 +14,7 @@ type DictionaryService interface {
 	CreateDictionary(dictionary models.DictionaryModel) error
 	FetchDictionaries() ([]models.DictionaryModel, error)
 	DeleteDictionary(id primitive.ObjectID) (*mongo.DeleteResult, error)
+	FetchTotalDictionaryUsed() ([]models.StatsDictionary, error)
 }
 type dictionaryService struct {
 	service          services.DictionaryService
@@ -47,5 +48,16 @@ func (s *dictionaryService) DeleteDictionary(id primitive.ObjectID) (*mongo.Dele
 
 // Query Repo
 func (s *dictionaryService) FetchDictionaries() ([]models.DictionaryModel, error) {
-	return s.service.GetAll()
+	dictionaries, err := s.service.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	return dictionaries, nil
+}
+func (s *dictionaryService) FetchTotalDictionaryUsed() ([]models.StatsDictionary, error) {
+	dictionaries, err := s.service.GetTotalDictionaryUsed()
+	if err != nil {
+		return nil, err
+	}
+	return dictionaries, nil
 }

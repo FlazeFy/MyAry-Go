@@ -68,3 +68,17 @@ func (h *FeedbackHandler) GetFeedBack(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Feedback not found", "data": nil})
 	}
 }
+func (h *FeedbackHandler) GetFeedBackStats(c *gin.Context) {
+	feedback, err := h.repo.FetchFeedBackStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something wrong, please call admin"})
+		return
+	}
+
+	if len(feedback) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Feedback not found", "data": nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Feedback found", "data": feedback})
+}

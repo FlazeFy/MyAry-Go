@@ -55,6 +55,7 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	{
 		dictionaryGroup.POST("", dictionaryHandler.CreateDictionary)
 		dictionaryGroup.GET("", dictionaryHandler.GetDictionaries)
+		dictionaryGroup.GET("/stats", dictionaryHandler.GetTotalDictionaryUsed)
 		dictionaryGroup.DELETE("/:id", dictionaryHandler.DeleteDictionary)
 	}
 
@@ -66,6 +67,7 @@ func SetupRoutes(r *gin.Engine, db *mongo.Database) {
 	{
 		feedbackGroup.POST("", feedbackHandler.CreateFeedback)
 		feedbackGroup.GET("", feedbackHandler.GetFeedBack)
+		feedbackGroup.GET("/stats", feedbackHandler.GetFeedBackStats)
 		feedbackGroup.DELETE("/:id", feedbackHandler.DeleteFeedback)
 	}
 }

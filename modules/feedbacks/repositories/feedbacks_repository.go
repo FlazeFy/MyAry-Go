@@ -14,6 +14,7 @@ type FeedbackRepository interface {
 	CreateFeedback(history models.FeedbackModel) error
 	FetchFeedbacks() ([]models.FeedbackModel, error)
 	DeleteFeedback(id primitive.ObjectID) (*mongo.DeleteResult, error)
+	FetchFeedBackStats() ([]models.StatsFeedback, error)
 }
 type feedbackService struct {
 	service services.FeedbackService
@@ -35,5 +36,16 @@ func (s *feedbackService) DeleteFeedback(id primitive.ObjectID) (*mongo.DeleteRe
 
 // Query Repo
 func (s *feedbackService) FetchFeedbacks() ([]models.FeedbackModel, error) {
-	return s.service.GetAll()
+	feedback, err := s.service.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	return feedback, nil
+}
+func (s *feedbackService) FetchFeedBackStats() ([]models.StatsFeedback, error) {
+	feedback, err := s.service.GetFeedBackStats()
+	if err != nil {
+		return nil, err
+	}
+	return feedback, nil
 }
